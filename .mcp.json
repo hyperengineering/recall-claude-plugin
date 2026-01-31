@@ -1,0 +1,7 @@
+{
+  "recall": {
+    "command": "npx",
+    "args": ["@hyperengineering/recall", "mcp"],
+    "env": {}
+  }
+}

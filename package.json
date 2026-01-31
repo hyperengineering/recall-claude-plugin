@@ -1,0 +1,10 @@
+{
+  "name": "recall-claude-plugin",
+  "version": "1.0.0",
+  "description": "Claude Code plugin for Recall - persistent memory for AI agents",
+  "private": true,
+  "scripts": {
+    "test": "node --test 'test/*.test.js'",
+    "validate": "claude plugin validate ."
+  }
+}
