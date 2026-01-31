@@ -1,0 +1,12 @@
+{
+  "name": "recall",
+  "description": "Persistent memory for AI agents - capture, store, and retrieve experiential knowledge across sessions",
+  "version": "1.0.0",
+  "author": {
+    "name": "Hyper Engineering"
+  },
+  "homepage": "https://github.com/hyperengineering/recall",
+  "repository": "https://github.com/hyperengineering/recall-claude-plugin",
+  "license": "MIT",
+  "keywords": ["memory", "knowledge", "agents", "mcp"]
+}
