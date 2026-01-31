@@ -16,18 +16,79 @@ Persistent memory for AI agents - capture, store, and retrieve experiential know
 
 3. Restart Claude Code to activate the MCP server.
 
-## Available Tools
+## MCP Tools Reference
 
-After installation, the following MCP tools are available:
+### recall_query
 
-| Tool | Description |
-|------|-------------|
-| `recall_query` | Retrieve relevant lore based on semantic similarity |
-| `recall_record` | Capture lore from current experience |
-| `recall_feedback` | Provide feedback on recalled lore to adjust confidence |
-| `recall_sync` | Synchronize local lore with Engram |
-| `recall_store_list` | List available stores from Engram |
-| `recall_store_info` | Get detailed information about a specific store |
+Retrieve relevant lore based on semantic similarity to a query.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | string | Yes | Search query to find relevant lore |
+| `k` | number | No | Maximum results (default: 5) |
+| `min_confidence` | number | No | Minimum confidence 0.0-1.0 (default: 0.5) |
+| `categories` | array | No | Filter by specific categories |
+| `store` | string | No | Target store ID |
+
+Returns lore entries with session references (L1, L2, ...) for feedback.
+
+### recall_record
+
+Capture lore from current experience for future recall.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `content` | string | Yes | The insight to record (max 4000 chars) |
+| `category` | string | Yes | Category (see below) |
+| `context` | string | No | Additional context (story, epic, situation) |
+| `confidence` | number | No | Initial confidence 0.0-1.0 (default: 0.5) |
+| `store` | string | No | Target store ID |
+
+**Categories:** `ARCHITECTURAL_DECISION`, `PATTERN_OUTCOME`, `INTERFACE_LESSON`, `EDGE_CASE_DISCOVERY`, `IMPLEMENTATION_FRICTION`, `TESTING_STRATEGY`, `DEPENDENCY_BEHAVIOR`, `PERFORMANCE_INSIGHT`
+
+### recall_feedback
+
+Provide feedback on recalled lore to adjust confidence.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `helpful` | array | No | Session refs of helpful lore (+0.08 confidence) |
+| `not_relevant` | array | No | Session refs of irrelevant lore (no change) |
+| `incorrect` | array | No | Session refs of incorrect lore (-0.15 confidence) |
+| `store` | string | No | Store ID (only for direct lore IDs) |
+
+Use session references (L1, L2, ...) from query results. Store is auto-resolved from session refs.
+
+### recall_sync
+
+Synchronize local lore with Engram.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `direction` | string | No | `pull`, `push`, or `both` (default: `both`) |
+| `store` | string | No | Target store ID |
+
+Requires `ENGRAM_URL` and `ENGRAM_API_KEY` to be configured.
+
+### recall_store_list
+
+List available stores from Engram.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prefix` | string | No | Filter stores by path prefix (e.g., `myorg/`) |
+
+Returns stores with record counts and last update times.
+
+### recall_store_info
+
+Get detailed information about a specific store.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `store` | string | No | Store ID to inspect (default: current store) |
+
+Returns store metadata, statistics, and category distribution.
 
 ## Configuration
 
@@ -66,6 +127,37 @@ Example configuration with environment variables:
     }
   }
 }
+```
+
+## Multi-Store Usage
+
+Query a specific project store:
+
+```
+recall_query(query="error handling", store="myorg/api-service")
+```
+
+Record to a team knowledge base:
+
+```
+recall_record(
+  content="Batch operations need idempotency keys",
+  category="PATTERN_OUTCOME",
+  store="myorg/shared-patterns"
+)
+```
+
+List available stores:
+
+```
+recall_store_list()
+recall_store_list(prefix="myorg/")  // Filter by organization
+```
+
+Session refs work across stores. If you query store A (returns L1-L3) then query store B (returns L4-L6), feedback on any ref auto-routes to the correct store:
+
+```
+recall_feedback(helpful=["L1", "L5"])  // L1 -> store A, L5 -> store B
 ```
 
 ## Security Considerations
